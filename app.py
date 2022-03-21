@@ -598,7 +598,8 @@ def item_chart(item_id):
     fig_item_day.add_trace(go.Bar(
                     x=agg_orders_day[agg_orders_day['itemID']==item_id]['day_of_year'],
                     y=agg_orders_day[agg_orders_day['itemID']==item_id]['order'],
-                    marker={"color": color_1}
+                    marker={"color": color_1},
+                    name="Total Orders"
                 ))
 
     fig_item_day.add_trace(go.Scatter(
@@ -613,7 +614,8 @@ def item_chart(item_id):
                     marker={
                         "maxdisplayed": 0,
                         "opacity": 0,
-                    }))
+                    },
+                    name="Sales Price"))
         
 
     fig_item_day.update_layout(
@@ -884,7 +886,6 @@ def price_chart(manuf_id):
         go.Scatter(
                 x=items[items['manufacturer']==manuf_id]['itemID'],
                 y=items[items['manufacturer']==manuf_id]['customerRating'],
-                hoverinfo="y",
                 marker={
                         "color": "rgb(255, 0, 0)",
                         "symbol": "diamond",
@@ -899,7 +900,7 @@ def price_chart(manuf_id):
                     height=420,
                     width=700,
                     dragmode="pan",
-                    hovermode="closest",
+                    hovermode="x unified",
                     autosize=False,
                     legend={
                         "x": 0.1,
@@ -921,17 +922,14 @@ def price_chart(manuf_id):
                     titlefont={"size": 20},
                     title_x=0.5,
                     xaxis={
-                        # "nticks": 50,
-                        # "range": [-0.5, 500.5],
                         "tickangle": -90,
                         "showgrid": False,
                         "tickfont": {"size": 10},
                         "ticks": "",
-                        "title": "Price",
+                        "title": "Item ID",
                     },
                     yaxis={
                         "autorange": True,
-                        # "linecolor": "rgb(128, 128, 128)",
                         "showgrid": True,
                         "gridcolor": "rgb(220,220,220)",
                         "showline": True,
