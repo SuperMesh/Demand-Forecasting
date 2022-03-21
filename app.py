@@ -17,7 +17,9 @@ app = dash.Dash('dashboard_app',
 
 infos  = pd.read_csv('data/infos.csv',  sep = '|')
 items  = pd.read_csv('data/items.csv',  sep = '|')
-orders = pd.read_csv('data/orders.csv', sep = '|')
+#orders = pd.read_csv('data/orders.csv', sep = '|')
+orders_day = pd.read_csv('data/orders_day.csv')
+orders_month = pd.read_csv('data/orders_month.csv')
 agg_orders_day = pd.read_csv('data/agg_orders_day.csv')
 agg_orders_month = pd.read_csv('data/agg_orders_month.csv')
 result = pd.read_csv('data/result.csv')
@@ -25,18 +27,18 @@ result = pd.read_csv('data/result.csv')
 items = pd.merge(infos, items, on = 'itemID', how = 'left')
 del infos
 
-orders['time'] = pd.to_datetime(orders['time'].astype('str'))
-orders['day_of_year'] = orders['time'].dt.dayofyear
-orders['month'] = orders['time'].dt.strftime('%m-%Y')
+# orders['time'] = pd.to_datetime(orders['time'].astype('str'))
+# orders['day_of_year'] = orders['time'].dt.dayofyear
+# orders['month'] = orders['time'].dt.strftime('%m-%Y')
 
 
-agg_order_daily = orders.groupby(['day_of_year'])['order'].agg('sum').reset_index()
-agg_order_monthly = orders.groupby(['month'])['order'].agg('sum').reset_index()
+# agg_order_daily = orders.groupby(['day_of_year'])['order'].agg('sum').reset_index()
+# agg_order_monthly = orders.groupby(['month'])['order'].agg('sum').reset_index()
 
-mean_price_daily = orders.groupby(['day_of_year'])['salesPrice'].agg('mean').reset_index()
-mean_price_monthly = orders.groupby(['month'])['salesPrice'].agg('mean').reset_index()
+mean_price_daily = agg_orders_day.groupby(['itemID'])['salesPrice'].agg('mean').reset_index()
+# mean_price_monthly = orders.groupby(['month'])['salesPrice'].agg('mean').reset_index()
 
-item_list = orders["itemID"].unique()
+item_list = items["itemID"].unique()
 item_list.sort()
 
 manuf_list = items['manufacturer'].unique()
@@ -106,15 +108,15 @@ color_b = "#F8F8FF"
 fig_day = go.Figure()
 
 fig_day.add_trace(go.Bar(
-            x=agg_order_daily['day_of_year'],
-            y=agg_order_daily['order'],
+            x=orders_day['day_of_year'],
+            y=orders_day['order'],
             marker={"color": color_1},
             name="Total Orders"
         ))
 
 fig_day.add_trace(go.Scatter(
-                x=mean_price_daily['day_of_year'],
-                y=mean_price_daily['salesPrice'],
+                x=orders_day['day_of_year'],
+                y=orders_day['salesPrice'],
                 hoverinfo="y",
                 line={
                     "color": "#e41f23",
@@ -194,13 +196,13 @@ fig_month = go.Figure()
 
 fig_month.add_trace(go.Bar(
             x=["Jan-18", "Feb-18", "Mar-18", "Apr-18", "May-18", "Jun-18"],
-            y=agg_order_monthly['order'],
+            y=orders_month['order'],
             marker={"color": color_1}
         ))
 
 fig_month.add_trace(go.Scatter(
                 x=["Jan-18", "Feb-18", "Mar-18", "Apr-18", "May-18", "Jun-18"],
-                    y=mean_price_monthly['salesPrice'],
+                    y=orders_month['salesPrice'],
                     hoverinfo="y",
                     line={
                         "color": "#e41f23",
@@ -580,7 +582,7 @@ model_content = dbc.Card(
         html.Br(),
         html.Br(),
         forecast_2
-    ])
+    ]),color="primary", outline=True,
 )
 
 
@@ -772,7 +774,7 @@ def item_chart(item_id):
 def cards_builder(item_id):
 
     # Cards
-    sales_price = "{:,.2f}".format(orders[orders['itemID']==item_id]['salesPrice'].mean())                   
+    sales_price = "{:,.2f}".format(mean_price_daily[mean_price_daily['itemID']==item_id]['salesPrice'].mean())                   
     promotion_price = items[items['itemID']==item_id]['simulationPrice']
     retail_price = items[items['itemID']==item_id]['recommendedRetailPrice']
     customer_rating = items[items['itemID']==item_id]['customerRating']
